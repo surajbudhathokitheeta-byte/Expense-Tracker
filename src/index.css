@@ -1,0 +1,1049 @@
+/* ============================================================
+   Expense Tracker - stylesheet
+   1. Design tokens      6. Summary cards
+   2. Reset & base       7. Panels & form
+   3. Layout shell       8. Calendar
+   4. Header             9. Chart
+   5. Month navigation  10. Transaction list / empty state
+   ============================================================ */
+
+/* ---------- 1. Design tokens ---------- */
+/* A small, muted palette on purpose: one warm neutral background, one ink
+   scale, one accent teal, and a green / red pair reserved for money in / money
+   out. Nothing else gets a colour of its own. */
+:root {
+  --paper: #f4f2ed;
+  --surface: #ffffff;
+  --surface-soft: #faf9f6;
+  --track: #eeece5;
+  --ink: #1c1f26;
+  --ink-soft: #5a606e;
+  --ink-faint: #8b91a0;
+  --line: #e7e4dd;
+  --accent: #3d6b60;
+  --accent-ink: #29504a;
+  --accent-soft: #e8efec;
+  --income: #2e7d5b;
+  --expense: #b4514a;
+  --expense-soft: #f9edec;
+  --radius-lg: 18px;
+  --radius: 12px;
+  --radius-sm: 9px;
+  --shadow: 0 1px 2px rgba(28, 31, 38, 0.04), 0 8px 24px rgba(28, 31, 38, 0.06);
+  --shadow-sm: 0 1px 2px rgba(28, 31, 38, 0.06);
+  --font: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+}
+
+/* ---------- 2. Reset & base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--font);
+  color: var(--ink);
+  background-color: var(--paper);
+  background-image: radial-gradient(
+    circle at 50% -20%,
+    rgba(61, 107, 96, 0.1),
+    transparent 55%
+  );
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+p,
+ul,
+figure {
+  margin: 0;
+}
+
+ul {
+  padding: 0;
+  list-style: none;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Money and dates line up in columns because of tabular figures. */
+.summary__value,
+.txn__amount,
+.bars__value,
+.legend__value,
+.summary__label,
+.pie__center strong {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 3. Layout shell ---------- */
+.app {
+  padding: 24px 18px 48px;
+}
+
+.app__inner {
+  max-width: 1180px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(320px, 372px) minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.layout__side {
+  position: sticky;
+  top: 18px;
+}
+
+.layout__main {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  min-width: 0;
+}
+
+.app__footer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+  padding-top: 6px;
+}
+
+/* ---------- 4. Header ---------- */
+.app-header {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 18px;
+  padding: 20px 24px;
+  border-radius: var(--radius-lg);
+  color: #f5f4f0;
+  background: #1f2b2a;
+  box-shadow: var(--shadow);
+}
+
+/* One soft wash of accent light, just enough to keep the dark band from
+   reading as a flat block. */
+.app-header::after {
+  content: "";
+  position: absolute;
+  right: -70px;
+  bottom: -110px;
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(127, 196, 178, 0.22), transparent 70%);
+  pointer-events: none;
+}
+
+.app-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.app-header__mark {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  flex: none;
+  border-radius: 13px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #14211f;
+  background: #7fc4b2;
+}
+
+.app-header__title {
+  font-size: 1.32rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+.app-header__subtitle {
+  font-size: 0.85rem;
+  color: rgba(245, 244, 240, 0.68);
+}
+
+.app-header__meta {
+  text-align: right;
+  position: relative;
+}
+
+.app-header__month {
+  font-size: 1.02rem;
+  font-weight: 600;
+}
+
+.app-header__count {
+  font-size: 0.8rem;
+  color: rgba(245, 244, 240, 0.68);
+}
+
+.app-header .btn-ghost--onDark {
+  position: relative;
+  color: rgba(245, 244, 240, 0.82);
+  border-color: rgba(245, 244, 240, 0.28);
+}
+
+.app-header .btn-ghost--onDark:hover:not(:disabled) {
+  background: rgba(245, 244, 240, 0.12);
+}
+
+/* ---------- 5. Month navigation ---------- */
+.monthnav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+.monthnav__controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.monthnav__label {
+  min-width: 190px;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.icon-btn {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  font-size: 1.2rem;
+  line-height: 1;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--surface-soft);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.icon-btn:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+/* ---------- 6. Summary cards ---------- */
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.summary__card {
+  position: relative;
+  padding: 16px 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+
+/* A single flat rule per card carries the meaning, so the three read as one
+   consistent set instead of three different treatments. */
+.summary__card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--ink-faint);
+}
+
+.summary__card--income::before {
+  background: var(--income);
+}
+
+.summary__card--expense::before {
+  background: var(--expense);
+}
+
+.summary__card--accent::before {
+  background: var(--accent);
+}
+
+.summary__label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.summary__value {
+  margin-top: 4px;
+  font-size: 1.4rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.summary__card--income .summary__value {
+  color: var(--income);
+}
+
+.summary__card--expense .summary__value {
+  color: var(--expense);
+}
+
+.summary__hint {
+  margin-top: 2px;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+/* ---------- 7. Panels & form ---------- */
+.panel {
+  padding: 18px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+
+.panel__head {
+  margin-bottom: 14px;
+}
+
+.panel__head--row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.panel__title {
+  font-size: 1.02rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.panel__sub {
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.field__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.field__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.field__hint {
+  font-size: 0.76rem;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.field__error {
+  margin-top: 5px;
+  font-size: 0.78rem;
+  color: var(--expense);
+}
+
+.field__live {
+  margin-top: 5px;
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+.input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--surface-soft);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.input:focus {
+  outline: none;
+  background: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Otherwise the browser supplies its own grey, which is darker than the
+   faint-ink step used everywhere else. */
+.input::placeholder {
+  color: var(--ink-faint);
+  opacity: 1;
+}
+
+.input--compact {
+  padding: 8px 10px;
+  font-size: 0.86rem;
+}
+
+.field--error .input {
+  border-color: var(--expense);
+  background: var(--expense-soft);
+}
+
+.input-group {
+  position: relative;
+}
+
+.input-group__prefix {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+
+.input--amount {
+  padding-left: 46px;
+  font-size: 1.06rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.segment {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5px;
+  padding: 4px;
+  background: var(--track);
+  border-radius: 12px;
+}
+
+.segment--small {
+  padding: 3px;
+  border-radius: 10px;
+}
+
+.segment__option {
+  padding: 9px 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.segment--small .segment__option {
+  padding: 5px 14px;
+  font-size: 0.8rem;
+}
+
+.segment__option.is-active {
+  background: var(--surface);
+  color: var(--accent);
+  box-shadow: var(--shadow-sm);
+}
+
+.segment__option--expense.is-active {
+  color: var(--expense);
+}
+
+.segment__option--income.is-active {
+  color: var(--income);
+}
+
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: var(--accent-ink);
+  color: #f2fbf8;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow: 0 6px 16px rgba(41, 80, 74, 0.2);
+  transition: transform 0.12s ease, background 0.15s ease;
+}
+
+.btn-primary:hover {
+  background: var(--accent);
+}
+
+.btn-primary:active {
+  transform: translateY(1px);
+}
+
+.btn-ghost {
+  padding: 7px 13px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.link-btn {
+  margin-left: 8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.form__status {
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.83rem;
+  font-weight: 600;
+}
+
+.form__status--success {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.form__status--error {
+  background: var(--expense-soft);
+  color: var(--expense);
+}
+
+/* ---------- 8. Calendar ---------- */
+.calendar {
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+}
+
+.calendar__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+/* Styled to match the month arrows in the toolbar rather than falling back to
+   the browser's default grey button. */
+.calendar__nav {
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+.calendar__nav:hover:not(:disabled) {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.calendar__nav:disabled {
+  background: var(--surface-soft);
+  color: var(--ink-faint);
+  opacity: 0.5;
+}
+
+.calendar__month {
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.calendar__weekdays,
+.calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+}
+
+.calendar__weekdays {
+  margin-bottom: 4px;
+}
+
+.calendar__weekday {
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--ink-faint);
+}
+
+.calendar__day {
+  aspect-ratio: 1 / 1;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+
+.calendar__day:hover:not(:disabled) {
+  background: var(--accent-soft);
+}
+
+.calendar__day--today {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 600;
+}
+
+.calendar__day--selected {
+  background: var(--accent-ink);
+  border-color: var(--accent-ink);
+  color: #f2fbf8;
+  font-weight: 600;
+}
+
+.calendar__day--selected:hover:not(:disabled) {
+  background: var(--accent);
+}
+
+/* ---------- 9. Chart ---------- */
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bars__row {
+  display: grid;
+  grid-template-columns: 148px minmax(0, 1fr) 92px;
+  align-items: center;
+  gap: 12px;
+  padding: 7px 0;
+  border-bottom: 1px dashed var(--line);
+}
+
+.bars__row:last-child {
+  border-bottom: 0;
+}
+
+.bars__label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.84rem;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bars__swatch,
+.legend__swatch {
+  flex: none;
+  border-radius: 3px;
+}
+
+.bars__swatch {
+  width: 10px;
+  height: 10px;
+}
+
+.bars__track {
+  height: 10px;
+  border-radius: 999px;
+  background: var(--track);
+  overflow: hidden;
+}
+
+.bars__fill {
+  display: block;
+  height: 100%;
+  min-width: 5px;
+  border-radius: 999px;
+  transition: width 0.35s ease;
+}
+
+.bars__value {
+  text-align: right;
+  font-size: 0.83rem;
+  font-weight: 600;
+}
+
+.pie {
+  display: grid;
+  grid-template-columns: 178px minmax(0, 1fr);
+  gap: 22px;
+  align-items: center;
+}
+
+.pie__canvas {
+  position: relative;
+  width: 178px;
+  height: 178px;
+}
+
+.pie__canvas svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.pie__center {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  pointer-events: none;
+}
+
+.pie__center span {
+  display: block;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.pie__center strong {
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.legend__row {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 0;
+  border-bottom: 1px dashed var(--line);
+  font-size: 0.84rem;
+}
+
+.legend__row:last-child {
+  border-bottom: 0;
+}
+
+.legend__swatch {
+  width: 10px;
+  height: 10px;
+}
+
+.legend__label {
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.legend__share {
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.legend__value {
+  min-width: 104px;
+  text-align: right;
+  font-weight: 600;
+}
+
+/* ---------- 10. Filters, list & empty state ---------- */
+.filterbar {
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.filterbar__fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.filterbar__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.filterbar__count {
+  margin-top: 9px;
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.txn-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.txn {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr) auto 30px;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 4px;
+  border-bottom: 1px solid var(--line);
+}
+
+.txn:last-child {
+  border-bottom: 0;
+}
+
+.txn__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.txn__main {
+  min-width: 0;
+}
+
+.txn__description {
+  font-size: 0.92rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.txn__meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--ink-faint);
+}
+
+.txn__amount {
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.txn__amount--income {
+  color: var(--income);
+}
+
+.txn__amount--expense {
+  color: var(--ink);
+}
+
+.txn__delete {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink-faint);
+  font-size: 0.82rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.txn__delete:hover {
+  background: var(--expense-soft);
+  border-color: #eed3d1;
+  color: var(--expense);
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 28px 16px;
+  text-align: center;
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+  background: var(--surface-soft);
+}
+
+.empty__icon {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 1.1rem;
+}
+
+.empty__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.empty__text {
+  max-width: 44ch;
+  font-size: 0.84rem;
+  color: var(--ink-faint);
+}
+
+.empty .btn-ghost {
+  margin-top: 8px;
+}
+
+/* ---------- 11. Responsive ---------- */
+@media (max-width: 1000px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .layout__side {
+    position: static;
+  }
+}
+
+@media (max-width: 760px) {
+  .app {
+    padding: 16px 12px 36px;
+  }
+
+  .summary {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-header__meta {
+    text-align: left;
+  }
+
+  .filterbar__fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .pie {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+  }
+
+  .legend {
+    width: 100%;
+  }
+
+  .bars__row {
+    grid-template-columns: 104px minmax(0, 1fr) 76px;
+    gap: 8px;
+  }
+
+  .monthnav {
+    flex-wrap: wrap;
+  }
+
+  .txn {
+    grid-template-columns: 10px minmax(0, 1fr) auto 28px;
+    gap: 8px;
+  }
+
+  .txn__description {
+    white-space: normal;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
